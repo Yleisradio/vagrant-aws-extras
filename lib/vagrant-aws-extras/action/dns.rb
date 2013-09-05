@@ -1,5 +1,6 @@
 require "log4r"
 require "fog"
+require "ipaddr"
 
 module VagrantPlugins
 	module AWS
@@ -52,18 +53,20 @@ module VagrantPlugins
 						end
 
 						def set(env)
+							record_type = !(IPAddr.new(env[:machine_ssh_info][:host]) rescue nil).nil? ? "A" : "CNAME" 
+
 							if existing_record = env[:aws_dns_zone].records.get(env[:aws_dns_settings].record_name)
 								existing_record.modify({
 									:name => env[:aws_dns_settings].record_name,
 									:value => env[:machine_ssh_info][:host],
-									:type => env[:aws_dns_settings].record_type,
+									:type => record_type,
 									:ttl => env[:aws_dns_settings].record_ttl
 								})
 							else
 								existing_record = env[:aws_dns_zone].records.create({
 									:name => env[:aws_dns_settings].record_name,
 									:value => env[:machine_ssh_info][:host],
-									:type => env[:aws_dns_settings].record_type,
+									:type => record_type,
 									:ttl => env[:aws_dns_settings].record_ttl
 								})
 							end
@@ -84,8 +87,6 @@ module VagrantPlugins
 						end
 
 						def remove(env)
-							puts "hostname: #{env[:machine_ssh_info][:host]}"
-							puts "REMOVE: #{env[:aws_dns_zone].records} - #{env[:aws_dns_zone].records.detect { |record| record.value.include?(env[:machine_ssh_info][:host]) }}"
 							if existing_record = env[:aws_dns_zone].records.detect { |record| record.value.include?(env[:machine_ssh_info][:host]) }
 								existing_record.destroy
 							end
