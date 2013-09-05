@@ -23,17 +23,17 @@ module VagrantPlugins
           Config
         end
         
-        %w{up}.each do |action|
+        %w{up provision}.each do |action|
           action_hook(:set_dns_record, "machine_action_#{action}".to_sym) do |hook|
-            require_relative 'action'
+            require_relative 'action'  
             hook.append VagrantPlugins::AWS::Extras::Action.action_up
           end
         end
         
-        %w{destroy}.each do |action|
+        %w{suspend destroy}.each do |action|
           action_hook(:remove_dns_record, "machine_action_#{action}".to_sym) do |hook|
             require_relative 'action'
-            hook.append VagrantPlugins::AWS::Extras::Action.action_destroy
+            hook.prepend VagrantPlugins::AWS::Extras::Action.action_destroy
           end
         end
 

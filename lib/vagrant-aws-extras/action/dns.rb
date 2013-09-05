@@ -29,10 +29,13 @@ module VagrantPlugins
 							fog_config[:endpoint] = region_config.endpoint if region_config.endpoint
 							fog_config[:version]  = region_config.version if region_config.version
 
-							@logger.info("Connecting to AWS Route53.")
-							env[:aws_dns] = ::Fog::DNS.new(fog_config)
-							env[:aws_dns_zone] = env[:aws_dns].zones.detect { |zone| zone.domain == domain }
-
+							if fog_config
+								@logger.info("Connecting to AWS Route53.")
+								env[:aws_dns] = ::Fog::DNS.new(fog_config)
+								env[:aws_dns_zone] = env[:aws_dns].zones.detect { |zone| zone.domain == domain }
+							else
+								@logger.info("AWS not configured.")
+							end
 							@app.call(env)
 						end
 					end
@@ -44,18 +47,18 @@ module VagrantPlugins
 
 						def call(env)
 							@logger.info("Set DNS name")
-							env[:machine_dns_record] = set(env)
+							env[:machine_dns_record] = set(env) if env[:aws_dns_zone].records
 							@app.call(env)
 						end
 
 						def set(env)
-							if existing_record = env[:aws_dns_zone].records.find { |domain| domain.name == env[:aws_dns_settings].record_name }
+							if existing_record = env[:aws_dns_zone].records.get(env[:aws_dns_settings].record_name)
 								existing_record.modify({
 									:name => env[:aws_dns_settings].record_name,
 									:value => env[:machine_ssh_info][:host],
 									:type => env[:aws_dns_settings].record_type,
 									:ttl => env[:aws_dns_settings].record_ttl
-								}).save
+								})
 							else
 								existing_record = env[:aws_dns_zone].records.create({
 									:name => env[:aws_dns_settings].record_name,
@@ -64,7 +67,6 @@ module VagrantPlugins
 									:ttl => env[:aws_dns_settings].record_ttl
 								})
 							end
-
 							existing_record
 						end
 					end
@@ -77,15 +79,16 @@ module VagrantPlugins
 
 						def call(env)
 							@logger.info("Remove DNS name")
-							env[:machine_dns_record] = remove(env)
+							env[:machine_dns_record] = remove(env) if env[:aws_dns_zone].records
 							@app.call(env)
 						end
 
 						def remove(env)
-							if existing_record = env[:aws_dns_zone].records.detect { |domain| domain.name == env[:aws_dns_settings].record_name }
+							puts "hostname: #{env[:machine_ssh_info][:host]}"
+							puts "REMOVE: #{env[:aws_dns_zone].records} - #{env[:aws_dns_zone].records.detect { |record| record.value.include?(env[:machine_ssh_info][:host]) }}"
+							if existing_record = env[:aws_dns_zone].records.detect { |record| record.value.include?(env[:machine_ssh_info][:host]) }
 								existing_record.destroy
 							end
-							existing_record
 						end
 					end
 				end

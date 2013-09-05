@@ -22,7 +22,9 @@ module VagrantPlugins
 				def self.action_destroy
 					Vagrant::Action::Builder.new.tap do |builder|
 						builder.use ConfigValidate
-						builder.use DNS::ConnectAWS					
+						builder.use	::VagrantPlugins::AWS::Action::ConnectAWS
+						builder.use ::VagrantPlugins::AWS::Action::ReadSSHInfo
+						builder.use DNS::ConnectAWS			
 						builder.use DNS::Remove
 					end
 				end
