@@ -11,21 +11,29 @@ module VagrantPlugins
 
 				def self.action_up
 					Vagrant::Action::Builder.new.tap do |builder|
-						builder.use ConfigValidate
-						builder.use	::VagrantPlugins::AWS::Action::ConnectAWS
-						builder.use ::VagrantPlugins::AWS::Action::ReadSSHInfo
-						builder.use DNS::ConnectAWS
-						builder.use DNS::Set
+						builder.use Call, DNS::ProviderIsAWS do |env, aws_builder|
+							if env[:result]
+								aws_builder.use ConfigValidate
+								aws_builder.use	::VagrantPlugins::AWS::Action::ConnectAWS
+								aws_builder.use ::VagrantPlugins::AWS::Action::ReadSSHInfo
+								aws_builder.use DNS::ConnectAWS
+								aws_builder.use DNS::Set
+							end
+						end
 					end
 				end
 
 				def self.action_destroy
 					Vagrant::Action::Builder.new.tap do |builder|
-						builder.use ConfigValidate
-						builder.use	::VagrantPlugins::AWS::Action::ConnectAWS
-						builder.use ::VagrantPlugins::AWS::Action::ReadSSHInfo
-						builder.use DNS::ConnectAWS			
-						builder.use DNS::Remove
+						builder.use Call, DNS::ProviderIsAWS do |env, aws_builder|
+							if env[:result]
+								aws_builder.use ConfigValidate
+								aws_builder.use	::VagrantPlugins::AWS::Action::ConnectAWS
+								aws_builder.use ::VagrantPlugins::AWS::Action::ReadSSHInfo
+								aws_builder.use DNS::ConnectAWS			
+								aws_builder.use DNS::Remove
+							end
+						end
 					end
 				end
 

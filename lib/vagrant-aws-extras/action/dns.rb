@@ -7,6 +7,16 @@ module VagrantPlugins
 		module Extras
 			module Action
 				module DNS
+					class ProviderIsAWS
+						def initialize(app, env)
+							@app = app
+						end
+
+						def call(env)
+							env[:result] = env[:machine].provider_name == "aws"
+							@app.call(env)
+						end
+					end
 					class ConnectAWS
 						def initialize(app, env)
 							@app = app 

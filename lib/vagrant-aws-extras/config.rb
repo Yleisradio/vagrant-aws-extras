@@ -46,13 +46,15 @@ module VagrantPlugins
 	    	def finalize!
 	    		@record_zone 		 	 = nil if @record_zone == UNSET_VALUE	
 	    		@record_type 			 = "CNAME" if @record_type == UNSET_VALUE
-	    		@record_name 		 = nil if @record_name == UNSET_VALUE
+	    		@record_name 		 	 = nil if @record_name == UNSET_VALUE
 	    		@record_ttl 			 = 3600 if @record_ttl == UNSET_VALUE
 	    		@remove_on_suspend = true if @remove_on_suspend == UNSET_VALUE
 	    		@remove_on_destroy = true if @remove_on_destroy == UNSET_VALUE
 	    	end
 
 	    	def validate(machine)
+	    		return {} if machine.provider_name != "aws"
+
 	    		errors = []
 	    		errors.push "record zone must be set" unless @record_zone
 	    		errors.push "record name must be set" unless @record_name
