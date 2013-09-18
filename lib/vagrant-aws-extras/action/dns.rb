@@ -13,7 +13,7 @@ module VagrantPlugins
 						end
 
 						def call(env)
-							env[:result] = env[:machine].provider_name == "aws"
+							env[:result] = env[:machine].provider_name.to_s == "aws"
 							@app.call(env)
 						end
 					end

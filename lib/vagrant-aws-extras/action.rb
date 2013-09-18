@@ -13,7 +13,6 @@ module VagrantPlugins
 					Vagrant::Action::Builder.new.tap do |builder|
 						builder.use Call, DNS::ProviderIsAWS do |env, aws_builder|
 							if env[:result]
-								aws_builder.use ConfigValidate
 								aws_builder.use	::VagrantPlugins::AWS::Action::ConnectAWS
 								aws_builder.use ::VagrantPlugins::AWS::Action::ReadSSHInfo
 								aws_builder.use DNS::ConnectAWS
@@ -27,7 +26,6 @@ module VagrantPlugins
 					Vagrant::Action::Builder.new.tap do |builder|
 						builder.use Call, DNS::ProviderIsAWS do |env, aws_builder|
 							if env[:result]
-								aws_builder.use ConfigValidate
 								aws_builder.use	::VagrantPlugins::AWS::Action::ConnectAWS
 								aws_builder.use ::VagrantPlugins::AWS::Action::ReadSSHInfo
 								aws_builder.use DNS::ConnectAWS			

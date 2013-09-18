@@ -1,7 +1,7 @@
 module VagrantPlugins
   module AWS
   	module Extras
-    	VERSION = "0.0.1.rc4"
+    	VERSION = "0.0.1.rc5"
     end
   end
 end
